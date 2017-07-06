@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="eiu.example.tuann.bus.NearbyBusStopActivity"
+    tools:showIn="@layout/activity_nearby_bus_stop">
+
+    <FrameLayout
+        android:id="@+id/full_layout_nearby_bus_stop"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <TextView
+            android:id="@+id/clean_listview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:text="Không có trạm xe bus nào gần đây trong phạm vi 5km"
+            android:visibility="gone" />
+
+        <ListView
+            android:id="@+id/list_nearby_busstop"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"></ListView>
+
+        <ImageView
+            android:id="@+id/bus_gif"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_marginBottom="50dp"
+            android:foregroundGravity="bottom"
+            android:scaleType="fitXY"
+            android:visibility="gone">
+
+            <requestFocus></requestFocus>
+        </ImageView>
+
+        <com.wang.avi.AVLoadingIndicatorView
+            android:id="@+id/avi"
+            style="@style/AVLoadingIndicatorView.Large"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:foregroundGravity="bottom"
+            android:visibility="gone"
+            app:indicatorColor="@color/colorPrimary"
+            app:indicatorName="BallPulseIndicator">
+
+            <requestFocus></requestFocus>
+        </com.wang.avi.AVLoadingIndicatorView>
+
+    </FrameLayout>
+</android.support.constraint.ConstraintLayout>

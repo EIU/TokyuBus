@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="5dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp"
+    android:paddingTop="5dp"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="eiu.example.tuann.bus.ReportActivity"
+    tools:showIn="@layout/activity_report">
+
+    <FrameLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <RelativeLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+            <LinearLayout
+                android:id="@+id/line1"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+
+                <EditText
+                    android:id="@+id/receiver"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:background="@drawable/shape_edittext_round"
+                    android:enabled="false"
+                    android:padding="10dp"
+                    android:text="tuan.nguyen.set14@eiu.edu.vn" />
+
+                <ImageView
+                    android:id="@+id/send"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="7dp"
+                    android:layout_marginTop="5dp"
+                    android:layout_toRightOf="@id/receiver"
+                    android:background="@drawable/ic_action_send" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@+id/line1"
+                android:layout_marginTop="10dp"
+                android:background="@drawable/shape_edittext_round"
+                android:ems="10"
+                android:gravity="left"
+                android:hint="Bất kỳ lỗi hoặc góp ý nào! cám ơn bạn đã đóng góp."
+                android:inputType="textMultiLine"
+                android:padding="10dp" />
+
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/bus_gif"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:layout_marginBottom="50dp"
+            android:foregroundGravity="bottom"
+            android:scaleType="fitXY"
+            android:visibility="gone">
+
+            <requestFocus></requestFocus>
+        </ImageView>
+
+        <com.wang.avi.AVLoadingIndicatorView
+            android:id="@+id/avi"
+            style="@style/AVLoadingIndicatorView.Large"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"
+            android:foregroundGravity="bottom"
+            android:visibility="gone"
+            app:indicatorColor="@color/colorPrimary"
+            app:indicatorName="BallPulseIndicator">
+
+            <requestFocus></requestFocus>
+        </com.wang.avi.AVLoadingIndicatorView>
+
+    </FrameLayout>
+</android.support.constraint.ConstraintLayout>

@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "226699646302",
+    "firebase_url": "https://becamex-tokyu-bus.firebaseio.com",
+    "project_id": "becamex-tokyu-bus",
+    "storage_bucket": "becamex-tokyu-bus.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:226699646302:android:69102e01448bacc8",
+        "android_client_info": {
+          "package_name": "eiu.example.tuann.bus"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "226699646302-12acpdmrqnoc3h24bd6u7qapr9nut86c.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "eiu.example.tuann.bus",
+            "certificate_hash": "87facb2c1e19ad83f75e1a4ca33cab103599175f"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsitqTFrXkYH9E3741ueYiIcnWzc41A7s"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

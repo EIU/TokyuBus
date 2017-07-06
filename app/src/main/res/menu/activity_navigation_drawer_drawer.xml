@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:title="Loại bản đồ">
+        <menu>
+            <item
+                android:id="@+id/nav_nomal"
+                android:icon="@drawable/ic_menu_nomal"
+                android:title="Bình thường" />
+            <item
+                android:id="@+id/nav_hybrid"
+                android:icon="@drawable/ic_menu_hybrid"
+                android:title="Hổn hợp" />
+            <item
+                android:id="@+id/nav_stallite"
+                android:icon="@drawable/ic_menu_satellite"
+                android:title="Vệ tinh" />
+            <item
+                android:id="@+id/nav_terrain"
+                android:icon="@drawable/ic_menu_terrain"
+                android:title="Địa hình" />
+            <item
+                android:id="@+id/nav_none"
+                android:icon="@drawable/ic_menu_none"
+                android:title="Trống" />
+        </menu>
+    </item>
+    <item android:title="Tiện ích">
+        <menu>
+            <item
+                android:id="@+id/nav_nearby_bustop"
+                android:icon="@drawable/ic_bus_stop"
+                android:title="Trạm xe bus gần bạn"></item>
+            <item
+                android:id="@+id/nav_schedule"
+                android:icon="@drawable/ic_menu_schedule"
+                android:title="Lộ trình"></item>
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/nav_bug"
+        android:icon="@drawable/ic_menu_bug"
+        android:title="Báo cáo lỗi hoặc góp ý"></item>
+</menu>

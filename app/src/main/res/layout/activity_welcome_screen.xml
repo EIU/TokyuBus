@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:background="#0099cc"
+    android:orientation="vertical"
+    android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+    tools:context="eiu.example.tuann.bus.WelcomeScreenActivity">
+
+    <ImageView
+        android:id="@+id/backgroundgif"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:foregroundGravity="center"
+        android:scaleType="fitXY" />
+
+    <ImageView
+        android:layout_width="170dp"
+        android:layout_height="300dp"
+        android:layout_gravity="top|center"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/logo_footer"
+        android:gravity="center"
+        android:id="@+id/logo"/>
+
+    <com.wang.avi.AVLoadingIndicatorView
+        android:id="@+id/avi"
+        style="@style/AVLoadingIndicatorView.Large"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:foregroundGravity="bottom"
+        app:indicatorColor="@color/colorPrimary"
+        app:indicatorName="BallPulseIndicator">
+
+        <requestFocus></requestFocus>
+    </com.wang.avi.AVLoadingIndicatorView>
+
+</FrameLayout>
+
+
