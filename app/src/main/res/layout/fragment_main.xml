@@ -1,0 +1,73 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="eiu.example.tuann.bus.MainFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="15dp"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="30dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:orientation="vertical">
+
+        <AutoCompleteTextView
+            android:id="@+id/edittextFindAddress"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_margin="5dp"
+            android:background="@drawable/search_edittext"
+            android:drawableLeft="@drawable/ic_open_drawer"
+            android:drawablePadding="10dp"
+            android:drawableRight="@drawable/ic_action_clear"
+            android:hint="Nhập nơi cần tìm hoặc số xe (VD: Xe 54)"
+            android:imeOptions="actionSearch"
+            android:inputType="textAutoComplete"
+            android:maxLines="1"
+            android:singleLine="true"
+            android:textColorHint="@color/colorGray500"></AutoCompleteTextView>
+
+    </LinearLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end">
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_current_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/fab_margin"
+            android:scaleType="center"
+            app:backgroundTint="@color/colorPrimary"
+            app:srcCompat="@drawable/ic_action_current_location" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_direction"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/fab_current_location"
+            android:layout_margin="@dimen/fab_margin"
+            android:scaleType="center"
+            app:backgroundTint="@color/colorPrimary"
+            app:srcCompat="@android:drawable/ic_menu_directions" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_walking"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/fab_current_location"
+            android:layout_margin="@dimen/fab_margin"
+            android:scaleType="center"
+            android:visibility="gone"
+            app:backgroundTint="@color/colorPrimary"
+            app:srcCompat="@drawable/ic_travel_walking" />
+    </RelativeLayout>
+
+</FrameLayout>

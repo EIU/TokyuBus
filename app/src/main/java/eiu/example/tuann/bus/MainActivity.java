@@ -2,30 +2,26 @@ package eiu.example.tuann.bus;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.AppBarLayout;
-import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.text.Html;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Gravity;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -35,12 +31,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewTreeObserver;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -48,14 +41,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.aurelhubert.ahbottomnavigation.AHBottomNavigation;
-import com.aurelhubert.ahbottomnavigation.AHBottomNavigationItem;
 import com.bumptech.glide.Glide;
 import com.firebase.client.ChildEventListener;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
@@ -92,23 +84,24 @@ import com.wang.avi.AVLoadingIndicatorView;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.TreeMap;
+import java.util.TreeSet;
+
+import static eiu.example.tuann.bus.MainFragment.fabDirection;
+import static eiu.example.tuann.bus.MainFragment.fabWalking;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, OnMapReadyCallback, View.OnClickListener, GoogleApiClient.OnConnectionFailedListener, GoogleMap.OnMarkerClickListener, GoogleMap.InfoWindowAdapter, GoogleApiClient.ConnectionCallbacks, com.google.android.gms.location.LocationListener, GoogleMap.OnMapClickListener, GoogleMap.OnMapLongClickListener {
 
     private static final String TAG = null;
 
-    private AutoCompleteTextView mAutocompleteFindAddess;
+    public static DrawerLayout drawer;
 
     public static PlaceAutocompleteAdapter mAdapterPlaceAutoComplete;
-    private AdapterCurrentLocation mAdapterCurrentLocationAutoComplete;
 
     private View header;
     private Button button_login_without;
@@ -130,23 +123,14 @@ public class MainActivity extends AppCompatActivity
     private TextView mEmailLoged;
     private TextView mNameLoged;
     private ImageView buttonDropDown;
-    private FloatingActionButton fabDirection;
-    private FloatingActionButton fabWalking;
-    private FloatingActionButton fabCurrentLocation;
-    private AppBarLayout fullLayoutDirection;
-    private ImageView backDirection;
-    private AutoCompleteTextView startDirectionAutoComplete;
-    private AutoCompleteTextView endDirectionAutoComplete;
-    private ImageView swapTextDirection;
     public static View viewMap;
     public static TextView tvDistanceDuration;
-    public static AVLoadingIndicatorView avLoadingIndicatorView;
-    public static ImageView animation;
+    private static AVLoadingIndicatorView avLoadingIndicatorView;
+    private static ImageView animation;
 
     private static final LatLngBounds BOUNDS_GREATER_SYDNEY = new LatLngBounds(new LatLng(-0, 0), new LatLng(-0, 0));
 
     private boolean loged = false;
-
 
     private FirebaseAuth firebaseAuth;
     private DatabaseReference databaseReference;
@@ -169,17 +153,14 @@ public class MainActivity extends AppCompatActivity
 
     private HashMap<String, String> hashMapBus = new HashMap<String, String>();
 
-    public static HashMap<Double, Double> hashMapNearByBusStop;
-
-    private Location myCurrentLocation;
+    public static Location myCurrentLocation;
 
     private ProgressDialog progressDialog;
+
     private double oldlat;
     private double oldlong;
 
-    private DrawerLayout drawer;
-
-    public static LatLng currenLocation;
+    public static LatLng currentLocation;
 
     public static Polyline polyline = null;
 
@@ -189,6 +170,13 @@ public class MainActivity extends AppCompatActivity
 
     public static String travelMod;
 
+    public static HashMap<Double, Double> hashMapNearByBusStop;
+
+    private FragmentManager manager = getSupportFragmentManager();
+    private MainFragment mainFragment = new MainFragment();
+    private DirectionFragment directionFragment = new DirectionFragment();
+    private PlacePickerFragment placePickerFragment = new PlacePickerFragment();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -196,7 +184,6 @@ public class MainActivity extends AppCompatActivity
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_navigation_drawer);
-
         appCompatActivity = MainActivity.this;
 
         progressDialog = new ProgressDialog(this);
@@ -206,6 +193,11 @@ public class MainActivity extends AppCompatActivity
         animation = (ImageView) findViewById(R.id.bus_gif);
         Glide.with(this).load(R.drawable.gif_bus).into(animation);
         avLoadingIndicatorView = (AVLoadingIndicatorView) (findViewById(R.id.avi));
+
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.setDrawerListener(toggle);
+        toggle.syncState();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -217,91 +209,79 @@ public class MainActivity extends AppCompatActivity
 
         buildGoogleApiClient();
 
-        setupToolbarLayout();
-
         overridePendingTransition(R.animator.start_nothing, R.animator.start_nothing);
 
-        fabDirection = (FloatingActionButton) (findViewById(R.id.fab_direction));
-        fabWalking = (FloatingActionButton) (findViewById(R.id.fab_walking));
-        fabCurrentLocation = (FloatingActionButton) (findViewById(R.id.fab_current_location));
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        navigationView.setItemIconTintList(null);
+
+        manager.beginTransaction().replace(R.id.main_layout_maps, mainFragment, mainFragment.getTag()).commit();
+
         tvDistanceDuration = (TextView) findViewById(R.id.tv_distance_time);
-        fullLayoutDirection = (AppBarLayout) (findViewById(R.id.full_layout_direction));
-        backDirection = (ImageView) (findViewById(R.id.back_direction));
-        startDirectionAutoComplete = (AutoCompleteTextView) (findViewById(R.id.start_location));
-        endDirectionAutoComplete = (AutoCompleteTextView) (findViewById(R.id.end_location));
-        swapTextDirection = (ImageView) (findViewById(R.id.swap_location));
-        swapTextDirection.setOnClickListener(this);
-        fabDirection.setOnClickListener(this);
-        fabWalking.setOnClickListener(this);
-        fabCurrentLocation.setOnClickListener(this);
-        backDirection.setOnClickListener(this);
 
         firebaseAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference();
         storageReference = FirebaseStorage.getInstance().getReference();
         firebaseStorage = FirebaseStorage.getInstance();
         mStorageRef = firebaseStorage.getReferenceFromUrl("gs://becamex-tokyu-bus.appspot.com");
-
         firebaseGetLocation = new Firebase("https://becamex-tokyu-bus.firebaseio.com/User/Staff/Driver");
-        firebaseGetLocation.addChildEventListener(new ChildEventListener() {
-            @Override
-            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                Iterator iteratorName = dataSnapshot.child("Information").getChildren().iterator();
-                Iterator iteratorLocation = dataSnapshot.child("Location").getChildren().iterator();
-                while (iteratorLocation.hasNext()) {
-                    double latitude = (((Double) ((DataSnapshot) iteratorLocation.next()).getValue()));
-                    double longitude = (((Double) ((DataSnapshot) iteratorLocation.next()).getValue()));
-                    iteratorName.next();
-                    String name = (((String) ((DataSnapshot) iteratorName.next()).getValue()));
-                    hashMapBus.put(name.toLowerCase(), "" + latitude + " " + longitude);
-                    iteratorName.next();
-                    String phoneNumber = (((String) ((DataSnapshot) iteratorName.next()).getValue()));
+        if (checkGooglePlayServices() == true) {
+            firebaseGetLocation.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    Iterator iteratorName = dataSnapshot.child("Information").getChildren().iterator();
+                    Iterator iteratorLocation = dataSnapshot.child("Location").getChildren().iterator();
+                    while (iteratorLocation.hasNext()) {
+                        double latitude = (((Double) ((DataSnapshot) iteratorLocation.next()).getValue()));
+                        double longitude = (((Double) ((DataSnapshot) iteratorLocation.next()).getValue()));
+                        iteratorName.next();
+                        String name = (((String) ((DataSnapshot) iteratorName.next()).getValue()));
+                        hashMapBus.put(name.toLowerCase(), "" + latitude + " " + longitude);
+                        iteratorName.next();
+                        String phoneNumber = (((String) ((DataSnapshot) iteratorName.next()).getValue()));
 
-                    Geocoder geocoder;
-                    List<Address> addresses = null;
-                    geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
-                    try {
-                        addresses = geocoder.getFromLocation(latitude, longitude, 1);
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                        Geocoder geocoder;
+                        List<Address> addresses = null;
+                        geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
+                        try {
+                            addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                            //                    arrayListMarkerBus.add(name);
+                            Address address = addresses.get(0);
+                            String spi = (String.valueOf(address.getAddressLine(0) + ", " + address.getAddressLine(1) + ", " + address.getAddressLine(2) + ", " + address.getAddressLine(3) + "\n" + "Tọa độ: " + latitude + ", " + longitude));
+                            LatLng latLng = new LatLng(latitude, longitude);
+                            Marker nameMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(name).snippet(spi).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bus_marker)));
+                            hashMapMarkerBus.put(name, nameMarker);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
                     }
-//                    arrayListMarkerBus.add(name);
-                    Address address = addresses.get(0);
-                    String spi = (String.valueOf(address.getAddressLine(0) + ", " + address.getAddressLine(1) + ", " + address.getAddressLine(2) + ", " + address.getAddressLine(3) + "\n" + "Tọa độ: " + latitude + ", " + longitude));
-                    LatLng latLng = new LatLng(latitude, longitude);
-                    Marker nameMarker = mMap.addMarker(new MarkerOptions().position(latLng).title(name).snippet(spi).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bus_marker)));
-                    hashMapMarkerBus.put(name, nameMarker);
                 }
-            }
 
-            @Override
-            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                Iterator iteratorName = dataSnapshot.child("Information").getChildren().iterator();
-                Iterator iteratorLocation = dataSnapshot.child("Location").getChildren().iterator();
-                while (iteratorLocation.hasNext()) {
-                    double latitude = (((Double) ((DataSnapshot) iteratorLocation.next()).getValue()));
-                    double longitude = (((Double) ((DataSnapshot) iteratorLocation.next()).getValue()));
-                    iteratorName.next();
-                    String name = (((String) ((DataSnapshot) iteratorName.next()).getValue()));
-                    if (hashMapMarkerBus.get(name) != null) {
-                        hashMapMarkerBus.get(name).remove();
-                    }
-                    iteratorName.next();
-                    String phoneNumber = (((String) ((DataSnapshot) iteratorName.next()).getValue()));
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    Iterator iteratorName = dataSnapshot.child("Information").getChildren().iterator();
+                    Iterator iteratorLocation = dataSnapshot.child("Location").getChildren().iterator();
+                    while (iteratorLocation.hasNext()) {
+                        double latitude = (((Double) ((DataSnapshot) iteratorLocation.next()).getValue()));
+                        double longitude = (((Double) ((DataSnapshot) iteratorLocation.next()).getValue()));
+                        iteratorName.next();
+                        String name = (((String) ((DataSnapshot) iteratorName.next()).getValue()));
+                        if (hashMapMarkerBus.get(name) != null) {
+                            hashMapMarkerBus.get(name).remove();
+                        }
+                        iteratorName.next();
+                        String phoneNumber = (((String) ((DataSnapshot) iteratorName.next()).getValue()));
 
-                    Geocoder geocoder;
-                    List<Address> addresses = null;
-                    geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
-                    try {
-                        addresses = geocoder.getFromLocation(latitude, longitude, 1);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                        Geocoder geocoder;
+                        List<Address> addresses = null;
+                        geocoder = new Geocoder(MainActivity.this, Locale.getDefault());
+                        try {
+                            addresses = geocoder.getFromLocation(latitude, longitude, 1);
 
-                    hashMapBus.put(name.toLowerCase(), "" + latitude + " " + longitude);
-                    LatLng latLng = new LatLng(latitude - 10, longitude);
-                    Address address = addresses.get(0);
-                    String spi = (String.valueOf(address.getAddressLine(0) + ", " + address.getAddressLine(1) + ", " + address.getAddressLine(2) + ", " + address.getAddressLine(3) + "\n" + "Tọa độ: " + latitude + ", " + longitude));
+                            hashMapBus.put(name.toLowerCase(), "" + latitude + " " + longitude);
+                            LatLng latLng = new LatLng(latitude - 10, longitude);
+                            Address address = addresses.get(0);
+                            String spi = (String.valueOf(address.getAddressLine(0) + ", " + address.getAddressLine(1) + ", " + address.getAddressLine(2) + ", " + address.getAddressLine(3) + "\n" + "Tọa độ: " + latitude + ", " + longitude));
 
 
 //                    Location prevLoc = new Location("service Provider");
@@ -309,148 +289,49 @@ public class MainActivity extends AppCompatActivity
 //                    prevLoc.setLongitude(oldlong);
 //                    Location newLoc = new Location("service Provider");
 //                    newLoc.setLatitude(latitude);
-//                    newLoc.setLongitude(longitude);
+//                    newLoc.setLongitude(longit    ude);
 //                    float bearing = prevLoc.bearingTo(newLoc);
-                    Marker markerName = mMap.addMarker(new MarkerOptions().position(latLng).title(name).snippet(spi).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bus_marker)));
-                    hashMapMarkerBus.put(name, markerName);
-                    oldlong = longitude;
+                            Marker markerName = mMap.addMarker(new MarkerOptions().position(latLng).title(name).snippet(spi).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_bus_marker)));
+                            hashMapMarkerBus.put(name, markerName);
+                            oldlong = longitude;
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
-            }
 
-            @Override
-            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-            }
+                }
 
-            @Override
-            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
-            }
+                }
 
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
+                @Override
+                public void onCancelled(FirebaseError firebaseError) {
 
-            }
-        });
-        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
-        navigationView.setItemIconTintList(null);
-
+                }
+            });
+        }
         if (loged == true) {
             loged();
         } else {
             without_login();
         }
 
-        mAutocompleteFindAddess = (AutoCompleteTextView) (findViewById(R.id.edittextFindAddress));
-        mAutocompleteFindAddess.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
-        mAutocompleteFindAddess.setOnClickListener(this);
-        mAutocompleteFindAddess.setOnKeyListener(new View.OnKeyListener() {
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
-                        (keyCode == KeyEvent.KEYCODE_ENTER)) {
-                    findAddress();
-                    return true;
-                }
-                return false;
-            }
-        });
-
-        mAutocompleteFindAddess.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                final int DRAWABLE_LEFT = 0;
-                final int DRAWABLE_TOP = 1;
-                final int DRAWABLE_RIGHT = 2;
-                final int DRAWABLE_BOTTOM = 3;
-
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    if (event.getRawX() >= (mAutocompleteFindAddess.getRight() - mAutocompleteFindAddess.getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                        mAutocompleteFindAddess.setText("");
-                        return true;
-                    } else if (event.getRawX() <= (mAutocompleteFindAddess.getCompoundDrawables()[DRAWABLE_LEFT].getBounds().width()) + 110) {
-                        InputMethodManager imm = (InputMethodManager) MainActivity.this.getSystemService(Activity.INPUT_METHOD_SERVICE);
-                        //Find the currently focused view, so we can grab the correct window token from it.
-                        View view = MainActivity.this.getCurrentFocus();
-                        //If no view currently has focus, create a new one, just so we can grab a window token from it
-                        if (view == null) {
-                            view = new View(MainActivity.this);
-                        }
-                        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-                        drawer.openDrawer(Gravity.START);
-                        return true;
-                    }
-                }
-                return false;
-            }
-        });
-
         mGoogleApiClientAutoComplete = new GoogleApiClient.Builder(this).enableAutoManage(this, 0 /* clientId */, this).addApi(Places.GEO_DATA_API).build();
-
         AutocompleteFilter autocompleteFilter = new AutocompleteFilter.Builder().setTypeFilter(Place.TYPE_COUNTRY).setCountry("VN").build();
-
         mAdapterPlaceAutoComplete = new PlaceAutocompleteAdapter(this, mGoogleApiClientAutoComplete, BOUNDS_GREATER_SYDNEY, autocompleteFilter);
-
-        mAdapterCurrentLocationAutoComplete = new AdapterCurrentLocation(this, "Vị trí hiện tại");
-
-        AutoCompleteResult autoCompleteResult = new AutoCompleteResult();
-        mAutocompleteFindAddess.setOnItemClickListener(autoCompleteResult.mAutocompleteFindPlaceClickListener);
-        startDirectionAutoComplete.setOnItemClickListener(autoCompleteResult.mAutocompleteStartDirectionClickListener);
-        endDirectionAutoComplete.setOnItemClickListener(autoCompleteResult.mAutocompleteEndDirectionClickListener);
-        startDirectionAutoComplete.setAdapter(mAdapterPlaceAutoComplete);
-        endDirectionAutoComplete.setAdapter(mAdapterPlaceAutoComplete);
-        mAutocompleteFindAddess.setAdapter(mAdapterPlaceAutoComplete);
     }
 
-    private int hight = 0;
+    public static int hight = 0;
 
     @Override
     public void onClick(View v) {
-        if (v == fabDirection) {
-            mAutocompleteFindAddess.setVisibility(View.GONE);
-            fabCurrentLocation.setVisibility(View.GONE);
-            fabDirection.setVisibility(View.GONE);
-            fullLayoutDirection.setVisibility(View.VISIBLE);
-        } else if (v == fabWalking) {
-            if (markerPoints.size() >= 2) {
-                final RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) viewMap.getLayoutParams();
-                tvDistanceDuration.setVisibility(View.VISIBLE);
-                tvDistanceDuration.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @Override
-                    public void onGlobalLayout() {
-                        tvDistanceDuration.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        if (hight == 0) {
-                            hight = tvDistanceDuration.getHeight() * 3 - 16;
-                        }
-                        layoutParams.setMargins(0, 0, 0, hight);
-                    }
-                });
-                LatLng origin = markerPoints.get(0);
-                LatLng dest = markerPoints.get(1);
-
-                // Getting URL to the Google Directions API
-                String url = getUrl(origin, dest);
-                FetchUrl FetchUrl = new FetchUrl();
-
-                // Start downloading json data from Google Directions API
-                FetchUrl.execute(url);
-            }
-        } else if (v == fabCurrentLocation) {
-            if (myCurrentLocation != null) {
-                currenLocation = new LatLng(myCurrentLocation.getLatitude(), myCurrentLocation.getLongitude());
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currenLocation, 16));
-            }
-        } else if (v == backDirection) {
-            fullLayoutDirection.setVisibility(View.GONE);
-            mAutocompleteFindAddess.setVisibility(View.VISIBLE);
-            fabCurrentLocation.setVisibility(View.VISIBLE);
-            fabDirection.setVisibility(View.VISIBLE);
-        } else if (v == button_login_without) {
+        if (v == button_login_without) {
             hideKeyboard(this);
             login();
         } else if (v == button_t_register) {
@@ -481,10 +362,6 @@ public class MainActivity extends AppCompatActivity
                     without_login();
                 }
             }).setNegativeButton("Hủy bỏ", null).show();
-        } else if (v == swapTextDirection) {
-            String oldStart = startDirectionAutoComplete.getText().toString();
-            startDirectionAutoComplete.setText(endDirectionAutoComplete.getText().toString());
-            endDirectionAutoComplete.setText(oldStart);
         }
     }
 
@@ -502,8 +379,6 @@ public class MainActivity extends AppCompatActivity
         getMenuInflater().inflate(R.menu.navigation_drawer, menu);
         return true;
     }
-
-    public static  TreeMap<Float, String> TreeClickNearBy = new TreeMap<Float, String>();
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -528,9 +403,7 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_none) {
             mMap.setMapType(GoogleMap.MAP_TYPE_NONE);
         } else if (id == R.id.nav_nearby_bustop) {
-            animation.setVisibility(View.VISIBLE);
-            avLoadingIndicatorView.setVisibility(View.VISIBLE);
-            avLoadingIndicatorView.show();
+            showAnimation();
             Location target = new Location("Busstop");
             hashMapNearByBusStop = new HashMap<Double, Double>();
             for (Map.Entry<String, BusStopInfomation> entry : WelcomeScreenActivity.allBusStopInfomation.getAllBus().entrySet()) {
@@ -550,31 +423,6 @@ public class MainActivity extends AppCompatActivity
                         sleep(1000);
                     } catch (Exception e) {
                     } finally {
-                        TreeMap<Float, String> treeMap = new TreeMap<Float, String>();
-                        LatLng StartP = currenLocation;
-
-                        for (Map.Entry<Double, Double> entry : hashMapNearByBusStop.entrySet()) {
-                            double latitude = entry.getKey();
-                            double longitude = entry.getValue();
-                            float[] result = new float[1];
-                            Location.distanceBetween(StartP.latitude, StartP.longitude, latitude, longitude, result);
-                            LatLng latLng = new LatLng(latitude, longitude);
-                            TreeClickNearBy.put(result[0], entry.getKey() + " " + entry.getValue());
-                            treeMap.put(result[0],  WelcomeScreenActivity.allBusStopInfomation.getAllBus().get(latLng.toString()).getAddress());
-                        }
-                        for (Map.Entry<Float, String> entry : treeMap.entrySet()) {
-                            Float distanceDouble = entry.getKey();
-                            distanceDouble /= 1000;
-                            String distance = Float.toString(distanceDouble);
-                            if (distanceDouble >= 1) {
-                                distance = Double.toString(distanceDouble);
-                                NearbyBusStopActivity.listDistance.add("" + distance.substring(0, distance.indexOf('.') + 2) + "km");
-                            } else {
-                                distance = Double.toString(distanceDouble * 1000);
-                                NearbyBusStopActivity.listDistance.add("" + distance.substring(0, distance.indexOf('.') + 2) + "m");
-                            }
-                            NearbyBusStopActivity.listAddress.add(entry.getValue());
-                        }
                         Intent i = new Intent(MainActivity.this, NearbyBusStopActivity.class);
                         startActivity(i);
                     }
@@ -600,12 +448,21 @@ public class MainActivity extends AppCompatActivity
                 }
             };
             welcomeThread.start();
+        } else if (id == R.id.busstop) {
+            SendBusStopFragment sendBusStopFragment = new SendBusStopFragment();
+            manager.beginTransaction().replace(R.id.sendToFireBase, sendBusStopFragment, sendBusStopFragment.getTag()).commit();
+        } else if (id == R.id.enable_tracking_location) {
+            isTrackingLocationToFireBase = true;
+        } else if (id == R.id.disable_tracking_location) {
+            isTrackingLocationToFireBase = false;
         }
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+    private boolean isTrackingLocationToFireBase = false;
 
     public static GoogleMap mMap;
 
@@ -622,40 +479,41 @@ public class MainActivity extends AppCompatActivity
         mMap.setInfoWindowAdapter(this);
         mMap.setOnMapClickListener(this);
         mMap.setOnMapLongClickListener(this);
-
-        if (NearbyBusStopActivity.latLngClickNearBy != null) {
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(NearbyBusStopActivity.latLngClickNearBy, 16));
-            NearbyBusStopActivity.latLngClickNearBy = null;
-        }
-
         setUpBusStop();
     }
 
-    private boolean hideAllMain = false;
-    private boolean hideAllDirection = false;
+    private boolean isMainFragmentClickHide = false;
+    private boolean isDirectionFragmentClickHide = false;
+    public static boolean isMainFragmentshow = true;
+    public static boolean isDirectionFragmentShow = false;
 
     @Override
     public void onMapClick(LatLng latLng) {
-        hideKeyboard(this);
-        if (mAutocompleteFindAddess.getVisibility() == View.VISIBLE && fabWalking.getVisibility() == View.VISIBLE && fabCurrentLocation.getVisibility() == View.VISIBLE) {
-            fabWalking.setVisibility(View.GONE);
-            fabDirection.setVisibility(View.VISIBLE);
-        } else if (mAutocompleteFindAddess.getVisibility() == View.VISIBLE && fabDirection.getVisibility() == View.VISIBLE && fabCurrentLocation.getVisibility() == View.VISIBLE) {
-            fabDirection.setVisibility(View.GONE);
-            mAutocompleteFindAddess.setVisibility(View.GONE);
-            fabCurrentLocation.setVisibility(View.GONE);
-            hideAllMain = true;
-        } else if (fullLayoutDirection.getVisibility() == View.VISIBLE) {
-            fullLayoutDirection.setVisibility(View.GONE);
-            hideAllDirection = true;
-        } else if (hideAllMain == true) {
-            fabDirection.setVisibility(View.VISIBLE);
-            mAutocompleteFindAddess.setVisibility(View.VISIBLE);
-            fabCurrentLocation.setVisibility(View.VISIBLE);
-        } else if (hideAllDirection == true) {
-            hideAllDirection = false;
-            fullLayoutDirection.setVisibility(View.VISIBLE);
+        if (isKeyBoardVisible() == true) {
+            hideKeyboard(this);
+        } else {
+            if (isMainFragmentshow == true && isMainFragmentClickHide == false && isDirectionFragmentClickHide == false) {
+                manager.beginTransaction().replace(R.id.main_layout_maps, mainFragment, mainFragment.getTag()).hide(mainFragment).commit();
+                isMainFragmentClickHide = true;
+                isMainFragmentshow = false;
+            } else if (isDirectionFragmentShow == true && isDirectionFragmentClickHide == false && isMainFragmentClickHide == false) {
+                manager.beginTransaction().replace(R.id.direction_layout_maps, directionFragment, directionFragment.getTag()).hide(directionFragment).commit();
+                manager.beginTransaction().replace(R.id.layout_place_picker, placePickerFragment, placePickerFragment.getTag()).hide(placePickerFragment).commit();
+                isDirectionFragmentClickHide = true;
+                isDirectionFragmentShow = false;
+            } else if (isMainFragmentshow == false && isMainFragmentClickHide == true && isDirectionFragmentClickHide == false) {
+                manager.beginTransaction().replace(R.id.main_layout_maps, mainFragment, mainFragment.getTag()).show(mainFragment).commit();
+                isMainFragmentClickHide = false;
+                isMainFragmentshow = true;
+            } else if (isDirectionFragmentShow == false && isDirectionFragmentClickHide == true && isMainFragmentClickHide == false) {
+                manager.beginTransaction().replace(R.id.direction_layout_maps, directionFragment, directionFragment.getTag()).show(directionFragment).commit();
+                manager.beginTransaction().replace(R.id.layout_place_picker, placePickerFragment, placePickerFragment.getTag()).show(placePickerFragment).commit();
+                isDirectionFragmentClickHide = false;
+                isDirectionFragmentShow = true;
+            }
         }
+        fabDirection.setVisibility(View.VISIBLE);
+        fabWalking.setVisibility(View.GONE);
     }
 
     @Override
@@ -691,7 +549,7 @@ public class MainActivity extends AppCompatActivity
 
         markerPoints.add(latLng);
         if (markerPoints.size() == 1) {
-            markerPoints.add(currenLocation);
+            markerPoints.add(currentLocation);
         }
 
         List<Address> addresses = null;
@@ -712,44 +570,6 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-
-    public void findAddress() {
-        String location = mAutocompleteFindAddess.getText().toString().toLowerCase();
-        if (!hashMapBus.containsKey(location)) {
-            List<Address> addresses = null;
-            if (location.length() > 0) {
-                Geocoder geocoder = new Geocoder(this);
-                try {
-                    addresses = geocoder.getFromLocationName(location, 1);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                Address address = addresses.get(0);
-                LatLng latLng = new LatLng(address.getLatitude(), address.getLongitude());
-                if (findAddress != null) {
-                    findAddress.remove();
-                }
-                findAddress = mMap.addMarker(new MarkerOptions().position(latLng).title(address.getFeatureName()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
-            }
-        } else {
-            List<String> list = Arrays.asList(hashMapBus.get(location).toString().split(" "));
-            LatLng latLng = new LatLng(Double.parseDouble(list.get(0)), Double.parseDouble(list.get(1)));
-            if (findAddress != null) {
-                findAddress.remove();
-            }
-            findAddress = mMap.addMarker(new MarkerOptions().position(latLng).title(String.valueOf(location)).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-            if (findAddress != null) {
-                findAddress.remove();
-            }
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
-        }
-
-        mAutocompleteFindAddess.dismissDropDown();
-
-        hideKeyboard(MainActivity.this);
-    }
-
     public static LatLng locationMarkerClicked;
 
     @Override
@@ -767,13 +587,16 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onLocationChanged(Location location) {
         myCurrentLocation = location;
+        if (isTrackingLocationToFireBase == true) {
+            TrackingLocationToFireBase();
+        }
         if (myCurrentLocation != null && markerSetup == false) {
             markerSetup = true;
-            currenLocation = new LatLng(myCurrentLocation.getLatitude(), myCurrentLocation.getLongitude());
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currenLocation, 16));
+            currentLocation = new LatLng(myCurrentLocation.getLatitude(), myCurrentLocation.getLongitude());
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 16));
         }
         if (myCurrentLocation != null) {
-            currenLocation = new LatLng(myCurrentLocation.getLatitude(), myCurrentLocation.getLongitude());
+            currentLocation = new LatLng(myCurrentLocation.getLatitude(), myCurrentLocation.getLongitude());
         }
         if (user != null && user.getEmail().contains("@bustokyu.com")) {
             firebasePutLocation = new Firebase("https://becamex-tokyu-bus.firebaseio.com/User/Staff/Driver/" + user.getUid() + "/Location");
@@ -805,29 +628,15 @@ public class MainActivity extends AppCompatActivity
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
 
-    public static String getUrl(LatLng origin, LatLng dest) {
+    private boolean isKeyBoardVisible() {
+        InputMethodManager imm = (InputMethodManager) getApplicationContext()
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        // Origin of route
-        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
-
-        // Destination of route
-        String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
-
-
-        // Sensor enabled
-        String sensor = "sensor=true";
-
-        // Building the parameters to the web service
-        String parameters = str_origin + "&" + str_dest + "&" + sensor + "&" + "mode=" + travelMod;
-
-        // Output format
-        String output = "json";
-
-        // Building the url to the web service
-        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters;
-
-
-        return url;
+        if (imm.isAcceptingText()) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private final int GALLERY_INTENT = 2;
@@ -869,64 +678,40 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    private void setupToolbarLayout() {
-        AHBottomNavigation bottomNavigation = (AHBottomNavigation) findViewById(R.id.bottom_navigation);
+    public void moveLatLgnClickNearby() {
+        NearbyBusStopActivity nearbyBusStopActivity = new NearbyBusStopActivity();
+        LatLng latLng = nearbyBusStopActivity.getLatLngClickNearBy();
+        if (latLng != null) {
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
+            latLng = null;
+            nearbyBusStopActivity.setLatLngClickNearBy(latLng);
+        }
+    }
 
-// Create items
-        AHBottomNavigationItem item1 = new AHBottomNavigationItem("Walking", R.drawable.ic_travel_walking, R.color.colorWhite);
-        AHBottomNavigationItem item2 = new AHBottomNavigationItem("Bus", R.drawable.ic_travel_bus, R.color.colorWhite);
-        AHBottomNavigationItem item3 = new AHBottomNavigationItem("Bus", R.drawable.ic_travel_car, R.color.colorWhite);
+    public static void hideAnimation() {
+        animation.setVisibility(View.GONE);
+        avLoadingIndicatorView.setVisibility(View.GONE);
+        avLoadingIndicatorView.hide();
+    }
 
-// Add items
-        bottomNavigation.addItem(item1);
-        bottomNavigation.addItem(item2);
-        bottomNavigation.addItem(item3);
-        bottomNavigation.setDefaultBackgroundColor(Color.parseColor("#5C6BC0"));
+    public void showAnimation() {
+        animation.setVisibility(View.VISIBLE);
+        avLoadingIndicatorView.setVisibility(View.VISIBLE);
+        avLoadingIndicatorView.show();
+    }
 
-// Disable the translation inside the CoordinatorLayout
-        bottomNavigation.setBehaviorTranslationEnabled(false);
+    private TreeSet<String> treeSet = new TreeSet<String>();
 
-// Change colors
-        bottomNavigation.setAccentColor(Color.parseColor("#FFFFFF"));
-        bottomNavigation.setInactiveColor(Color.parseColor("#000000"));
-
-// Force to tint the drawable (useful for font with icon for example)
-        bottomNavigation.setForceTint(true);
-
-// Display color under navigation bar (API 21+)
-// Don't forget these lines in your style-v21
-// <item name="android:windowTranslucentNavigation">true</item>
-// <item name="android:fitsSystemWindows">true</item>
-        bottomNavigation.setTranslucentNavigationEnabled(true);
-
-// Manage titles
-//        bottomNavigation.setTitleState(AHBottomNavigation.TitleState.SHOW_WHEN_ACTIVE);
-//        bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_SHOW);
-        bottomNavigation.setTitleState(AHBottomNavigation.TitleState.ALWAYS_HIDE);
-
-// Use colored navigation with circle reveal effect
-        bottomNavigation.setColored(false);
-
-// Set current item programmatically
-        bottomNavigation.setCurrentItem(0);
-
-// Customize notification (title, background, typeface)
-        bottomNavigation.setNotificationBackgroundColor(Color.parseColor("#F63D2B"));
-
-// Set listeners
-        bottomNavigation.setOnTabSelectedListener(new AHBottomNavigation.OnTabSelectedListener() {
-            @Override
-            public boolean onTabSelected(int position, boolean wasSelected) {
-                // Do something cool here...
-                return true;
-            }
-        });
-        bottomNavigation.setOnNavigationPositionListener(new AHBottomNavigation.OnNavigationPositionListener() {
-            @Override
-            public void onPositionChange(int y) {
-                // Manage the new y position
-            }
-        });
+    private void TrackingLocationToFireBase() {
+        String key = databaseReference.push().getKey();
+        Firebase firebase = new Firebase("https://becamex-tokyu-bus.firebaseio.com/Bus Stop Information/" + key);
+        HashMap<String, Double> hashMap = new HashMap<String, Double>();
+        if (!treeSet.contains(currentLocation.toString())) {
+            treeSet.add(currentLocation.toString());
+            hashMap.put("Latitude", currentLocation.latitude);
+            hashMap.put("Longitude", currentLocation.longitude);
+        }
+        firebase.setValue(hashMap);
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1167,10 +952,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onPause() {
         super.onPause();
-
 //        stop location updates when Activity is no longer active
         if (mGoogleApiClient != null) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            if (checkGooglePlayServices()) {
+                LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, this);
+            }
         }
     }
 
@@ -1195,4 +981,20 @@ public class MainActivity extends AppCompatActivity
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    private boolean checkGooglePlayServices() {
+        final int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (status != ConnectionResult.SUCCESS) {
+            Log.e(TAG, GooglePlayServicesUtil.getErrorString(status));
+            // ask user to update google play services.
+            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this, 1);
+            dialog.show();
+            return false;
+        } else {
+            Log.i(TAG, GooglePlayServicesUtil.getErrorString(status));
+            // google play services is updated.
+            //your code goes here...
+            return true;
+        }
+    }
 }

@@ -1,0 +1,45 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="eiu.example.tuann.bus.PlacePickerFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorGray100"
+        android:id="@+id/layout_place_picker">
+
+        <View
+            android:id="@+id/line_one"
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:background="@color/colorGray500" />
+
+        <ImageView
+            android:id="@+id/img_place_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/line_one"
+            android:layout_marginLeft="30px"
+            android:layout_marginTop="3px"
+            android:background="@drawable/ic_place_location" />
+
+        <TextView
+            android:id="@+id/textview_place_picker"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="76px"
+            android:layout_marginTop="17px"
+            android:layout_toRightOf="@+id/img_place_location"
+            android:text="@string/choose_on_maps" />
+
+        <View
+            android:layout_width="fill_parent"
+            android:layout_height="1dip"
+            android:layout_below="@+id/textview_place_picker"
+            android:layout_marginTop="16px"
+            android:background="@color/colorGray500" />
+    </RelativeLayout>
+</FrameLayout>

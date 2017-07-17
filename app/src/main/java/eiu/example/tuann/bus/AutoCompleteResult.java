@@ -1,6 +1,5 @@
 package eiu.example.tuann.bus;
 
-import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Build;
@@ -143,72 +142,98 @@ public class AutoCompleteResult {
             List<String> list = Arrays.asList(place.getLatLng().toString().split(" "));
             String s = list.get(1).substring(1, list.get(1).length() - 1);
             list = Arrays.asList(s.toString().split(","));
-            LatLng latLng = new LatLng(Double.parseDouble(list.get(0)), Double.parseDouble(list.get(1)));
-
-            if (MainActivity.findAddress != null) {
-                MainActivity.findAddress.remove();
+            LatLng latLngEndDirection = new LatLng(Double.parseDouble(list.get(0)), Double.parseDouble(list.get(1)));
+            if (latLngStartDirection == null && MainActivity.currentLocation != null) {
+                latLngStartDirection = MainActivity.currentLocation;
             }
-
-            if (MainActivity.polyline != null) {
-                MainActivity.polyline.remove();
-            }
-
-            if (latLngStartDirection == null && MainActivity.currenLocation != null) {
-                latLngStartDirection = MainActivity.currenLocation;
-            }
-
-            MainActivity.startDirection = MainActivity.mMap.addMarker(new MarkerOptions().position(latLngStartDirection).title(String.valueOf(place.getName())).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_action_round)));
-            MainActivity.endDirection = MainActivity.mMap.addMarker(new MarkerOptions().position(latLng).title(String.valueOf(place.getName())).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-
-
-            if (MainActivity.markerPoints.size() > 1) {
-                MainActivity.markerPoints.clear();
-            }
-
-            MainActivity.markerPoints.add(latLng);
-            if (MainActivity.markerPoints.size() == 1) {
-                MainActivity.markerPoints.add(latLngStartDirection);
-            } else if (MainActivity.markerPoints.size() == 2) {
-                MainActivity.markerPoints.add(latLng);
-            }
-
-            List<Address> addresses = null;
-            Geocoder geocoder = new Geocoder(MainActivity.appCompatActivity);
-            try {
-                addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            Address adddress = addresses.get(0);
-            MainActivity.addressWalkingDirection = (String.valueOf(adddress.getAddressLine(0) + ", " + adddress.getAddressLine(1) + ", " + adddress.getAddressLine(2) + "\n" + "Tọa độ: " + latLng.latitude + ", " + latLng.longitude));
-
-            final RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) MainActivity.viewMap.getLayoutParams();
-            MainActivity.tvDistanceDuration.setVisibility(View.VISIBLE);
-            MainActivity.tvDistanceDuration.getViewTreeObserver().
-
-                    addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                        @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-                        @Override
-                        public void onGlobalLayout() {
-                            MainActivity.tvDistanceDuration.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                            if (hight == 0) {
-                                hight = MainActivity.tvDistanceDuration.getHeight() * 3 - 16;
-                            }
-                            layoutParams.setMargins(0, 0, 0, hight);
-                        }
-                    });
-            LatLng origin = MainActivity.markerPoints.get(0);
-            LatLng dest = MainActivity.markerPoints.get(1);
-
-            // Getting URL to the Google Directions API
-            String url = MainActivity.getUrl(origin, dest);
-            FetchUrl FetchUrl = new FetchUrl();
-
-            // Start downloading json data from Google Directions API
-            FetchUrl.execute(url);
-
-            MainActivity.hideKeyboard(MainActivity.appCompatActivity);
+            direction(latLngStartDirection, latLngEndDirection);
         }
     };
+
+    public void direction(LatLng start, LatLng end) {
+        if (MainActivity.findAddress != null) {
+            MainActivity.findAddress.remove();
+        }
+
+        if (MainActivity.polyline != null) {
+            MainActivity.polyline.remove();
+        }
+
+        MainActivity.startDirection = MainActivity.mMap.addMarker(new MarkerOptions().position(start).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_action_round)));
+        MainActivity.endDirection = MainActivity.mMap.addMarker(new MarkerOptions().position(end).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+
+
+        if (MainActivity.markerPoints.size() > 1) {
+            MainActivity.markerPoints.clear();
+        }
+
+        MainActivity.markerPoints.add(start);
+        if (MainActivity.markerPoints.size() == 1) {
+            MainActivity.markerPoints.add(end);
+        } else if (MainActivity.markerPoints.size() == 2) {
+            MainActivity.markerPoints.add(start);
+        }
+
+        List<Address> addresses = null;
+        Geocoder geocoder = new Geocoder(MainActivity.appCompatActivity);
+        try {
+            addresses = geocoder.getFromLocation(start.latitude, start.longitude, 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Address adddress = addresses.get(0);
+        MainActivity.addressWalkingDirection = (String.valueOf(adddress.getAddressLine(0) + ", " + adddress.getAddressLine(1) + ", " + adddress.getAddressLine(2) + "\n" + "Tọa độ: " + start.latitude + ", " + start.longitude));
+
+        final RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) MainActivity.viewMap.getLayoutParams();
+        MainActivity.tvDistanceDuration.setVisibility(View.VISIBLE);
+        MainActivity.tvDistanceDuration.getViewTreeObserver().
+
+                addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
+                    @Override
+                    public void onGlobalLayout() {
+                        MainActivity.tvDistanceDuration.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                        if (hight == 0) {
+                            hight = MainActivity.tvDistanceDuration.getHeight() * 3 - 16;
+                        }
+                        layoutParams.setMargins(0, 0, 0, hight);
+                    }
+                });
+        LatLng origin = MainActivity.markerPoints.get(0);
+        LatLng dest = MainActivity.markerPoints.get(1);
+
+        // Getting URL to the Google Directions API
+        String url = getUrl(origin, dest);
+        FetchUrl FetchUrl = new FetchUrl();
+
+        // Start downloading json data from Google Directions API
+        FetchUrl.execute(url);
+
+        MainActivity.hideKeyboard(MainActivity.appCompatActivity);
+    }
+
+    public String getUrl(LatLng origin, LatLng dest) {
+
+        // Origin of route
+        String str_origin = "origin=" + origin.latitude + "," + origin.longitude;
+
+        // Destination of route
+        String str_dest = "destination=" + dest.latitude + "," + dest.longitude;
+
+
+        // Sensor enabled
+        String sensor = "sensor=true";
+
+        // Building the parameters to the web service
+        String parameters = str_origin + "&" + str_dest + "&" + sensor + "&" + "mode=" + MainActivity.travelMod;
+
+        // Output format
+        String output = "json";
+
+        // Building the url to the web service
+        String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters;
+
+        return url;
+    }
 }

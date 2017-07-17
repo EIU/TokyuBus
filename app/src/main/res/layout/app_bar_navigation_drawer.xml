@@ -13,116 +13,20 @@
 
         <include layout="@layout/content_navigation_drawer" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="15dp"
-            android:layout_marginRight="15dp"
-            android:layout_marginTop="30dp"
-            android:focusable="true"
-            android:focusableInTouchMode="true"
-            android:orientation="vertical">
-
-            <AutoCompleteTextView
-                android:id="@+id/edittextFindAddress"
-                android:layout_width="match_parent"
-                android:layout_height="45dp"
-                android:layout_margin="5dp"
-                android:background="@drawable/search_edittext"
-                android:drawableLeft="@drawable/ic_open_drawer"
-                android:drawablePadding="10dp"
-                android:drawableRight="@drawable/ic_action_clear"
-                android:hint="Nhập nơi cần tìm hoặc số xe (VD: Xe 54)"
-                android:imeOptions="actionSearch"
-                android:inputType="textAutoComplete"
-                android:maxLines="1"
-                android:singleLine="true"
-                android:textColorHint="@color/colorGray500"></AutoCompleteTextView>
-
-        </LinearLayout>
-
-        <android.support.design.widget.AppBarLayout
-            android:id="@+id/full_layout_direction"
+        <FrameLayout
+            android:id="@+id/main_layout_maps"
             android:layout_width="fill_parent"
-            android:layout_height="196dp"
-            android:background="@color/colorPrimary"
-            android:visibility="gone">
+            android:layout_height="fill_parent"></FrameLayout>
 
+        <FrameLayout
+            android:id="@+id/direction_layout_maps"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"></FrameLayout>
 
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="5dp" />
-
-            <ImageView
-                android:id="@+id/back_direction"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="left|top"
-                android:layout_marginLeft="5dp"
-                android:background="@drawable/ic_action_back" />
-
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:focusable="true"
-                android:focusableInTouchMode="true"
-                android:gravity="center"
-                android:paddingTop="10dp">
-
-                <AutoCompleteTextView
-                    android:id="@+id/start_location"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="40dp"
-                    android:layout_marginRight="40dp"
-                    android:background="@drawable/shape_edittext"
-                    android:hint="Vị trí hiện tại"
-                    android:padding="5dp"
-                    android:textColorHint="@color/colorPrimary" />
-
-                <AutoCompleteTextView
-                    android:id="@+id/end_location"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/start_location"
-                    android:layout_marginLeft="40dp"
-                    android:layout_marginRight="40dp"
-                    android:layout_marginTop="10dp"
-                    android:background="@drawable/shape_edittext"
-                    android:hint="Nhập vị trí cần tìm"
-                    android:padding="5dp" />
-
-                <ImageView
-                    android:id="@+id/swap_location"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginRight="5dp"
-                    android:layout_marginTop="21dp"
-                    android:background="@drawable/ic_action_swap" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:background="@drawable/ic_action_location_search" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginTop="41dp"
-                    android:background="@drawable/ic_action_add_location" />
-
-                <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
-                    android:id="@+id/bottom_navigation"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/end_location"
-                    android:layout_marginTop="21dp" />
-            </RelativeLayout>
-        </android.support.design.widget.AppBarLayout>
+        <FrameLayout
+            android:id="@+id/sendToFireBase"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"></FrameLayout>
     </FrameLayout>
-
 </android.support.design.widget.CoordinatorLayout>

@@ -1,0 +1,114 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="eiu.example.tuann.bus.DirectionFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent">
+
+        <RelativeLayout
+            android:id="@+id/full_layout_direction"
+            android:layout_width="fill_parent"
+            android:layout_height="198dp"
+            android:background="@color/colorPrimary">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp" />
+
+            <ImageView
+                android:id="@+id/back_direction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left|top"
+                android:layout_marginLeft="5dp"
+                android:background="@drawable/ic_action_back" />
+
+            <RelativeLayout
+                android:id="@+id/layout_main_direction"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_below="@id/back_direction"
+                android:focusable="true"
+                android:focusableInTouchMode="true"
+                android:gravity="center"
+                android:paddingTop="10dp">
+
+                <AutoCompleteTextView
+                    android:id="@+id/start_location"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginRight="40dp"
+                    android:background="@drawable/shape_edittext"
+                    android:hint="Vị trí hiện tại"
+                    android:padding="5dp"
+                    android:textColorHint="@color/colorPrimary" />
+
+                <AutoCompleteTextView
+                    android:id="@+id/end_location"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/start_location"
+                    android:layout_marginLeft="40dp"
+                    android:layout_marginRight="40dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/shape_edittext"
+                    android:hint="Nhập vị trí cần tìm"
+                    android:padding="5dp" />
+
+                <ImageView
+                    android:id="@+id/swap_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="5dp"
+                    android:layout_marginTop="21dp"
+                    android:background="@drawable/ic_action_swap" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:background="@drawable/ic_action_location_search" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginTop="43dp"
+                    android:background="@drawable/ic_action_add_location" />
+            </RelativeLayout>
+
+            <android.support.design.widget.BottomNavigationView
+                android:id="@+id/navigation"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_below="@id/layout_main_direction"
+                android:layout_gravity="bottom"
+                android:layout_marginTop="30dp"
+                android:background="@color/colorBlue500"
+
+                app:itemIconTint="@drawable/selector_bottombar_item"
+                app:itemTextColor="@drawable/selector_bottombar_item"
+                app:menu="@menu/navigation" />
+        </RelativeLayout>
+
+        <FrameLayout
+            android:id="@+id/layout_place_picker"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/full_layout_direction"></FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/layout_recent_location"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/layout_place_picker"></FrameLayout>
+    </RelativeLayout>
+</FrameLayout>

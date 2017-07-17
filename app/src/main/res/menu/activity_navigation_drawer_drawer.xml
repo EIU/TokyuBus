@@ -41,4 +41,16 @@
         android:id="@+id/nav_bug"
         android:icon="@drawable/ic_menu_bug"
         android:title="Báo cáo lỗi hoặc góp ý"></item>
+
+    <item
+        android:id="@+id/busstop"
+        android:title="Gửi tọa dộ trạm xe"></item>
+
+    <item
+        android:id="@+id/enable_tracking_location"
+        android:title="Bắt đầu gửi vị trí đường đi"></item>
+
+    <item
+        android:id="@+id/disable_tracking_location"
+        android:title="Dừng gửi vị trí đường đi"></item>
 </menu>

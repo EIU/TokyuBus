@@ -29,6 +29,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.wang.avi.AVLoadingIndicatorView;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -68,25 +69,25 @@ public class WelcomeScreenActivity extends AppCompatActivity {
         if (isNetworkAvailable() == false) {
             NoConnection();
         } else {
-            checkPermissonLocation();
+            Connected();
         }
     }
 
-    private void checkPermissonLocation() {
-        checkLocationPermission();
+    private Boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnectedOrConnecting();
     }
 
-    public boolean isNetworkAvailable() {
-        ConnectivityManager cm = (ConnectivityManager)
-                getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo networkInfo = cm.getActiveNetworkInfo();
-        // if no network is available networkInfo will be null
-        // otherwise check if we are connected
-        if (networkInfo != null && networkInfo.isConnected()) {
-            connectedInternet = true;
-            return true;
+    public boolean isInternetAvailable() {
+        try {
+            InetAddress ipAddr = InetAddress.getByName("www.google.com");
+            return !ipAddr.equals("");
+
+        } catch (Exception e) {
+            return false;
         }
-        return false;
     }
 
     public void NoConnection() {
@@ -108,8 +109,7 @@ public class WelcomeScreenActivity extends AppCompatActivity {
                 if (isNetworkAvailable() == false) {
                     NoConnection();
                 } else {
-                    checkPermissonLocation();
-                    connectedInternet = true;
+                    Connected();
                 }
             }
         });
@@ -154,14 +154,14 @@ public class WelcomeScreenActivity extends AppCompatActivity {
                         Geocoder geocoder = new Geocoder(WelcomeScreenActivity.this, Locale.getDefault());
                         try {
                             addresses = geocoder.getFromLocation(latitude, longitude, 1);
+                            Address address = addresses.get(0);
+                            String addressS = address.getAddressLine(0) + ", " + address.getAddressLine(1) + ", " + address.getAddressLine(2) + ", " + address.getAddressLine(3) + "\n" + "Tọa độ: " + latitude + " " + longitude;
+                            LatLng latLng = new LatLng(latitude, longitude);
+                            BusStopInfomation busStopInfomation = new BusStopInfomation(addressS, latitude, longitude, latLng);
+                            hashMap.put(latLng.toString(), busStopInfomation);
                         } catch (IOException e) {
                             e.printStackTrace();
                         }
-                        Address address = addresses.get(0);
-                        String addressS = address.getAddressLine(0) + ", " + address.getAddressLine(1) + ", " + address.getAddressLine(2) + ", " + address.getAddressLine(3) + "\n" + "Tọa độ: " + latitude + " " + longitude;
-                        LatLng latLng = new LatLng(latitude, longitude);
-                        BusStopInfomation busStopInfomation = new BusStopInfomation(addressS, latitude, longitude, latLng);
-                        hashMap.put(latLng.toString(), busStopInfomation);
                     }
                     allBusStopInfomation = new AllBusStopInfomation(hashMap);
                     Intent i = new Intent(WelcomeScreenActivity.this,

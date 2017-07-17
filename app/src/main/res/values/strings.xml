@@ -16,4 +16,10 @@
     <string name="title_activity_report">ReportActivity</string>
     <string name="title_activity_direction">DirectionActivity</string>
     <string name="title_activity_information_marker">InformationMarkerActivity</string>
+    <string name="title_activity_bottom">BottomActivity</string>
+    <string name="title_travel_walking">Đi Bộ</string>
+    <string name="title_travel_bus">Bus Tokyu</string>
+    <string name="title_travel_car">Ô tô</string>
+    <string name="choose_on_maps">Chọn trên bản đồ</string>
+    <string name="title_activity_find_bus_stop">FindBusStopActivity</string>
 </resources>

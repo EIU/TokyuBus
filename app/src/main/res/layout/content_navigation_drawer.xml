@@ -37,42 +37,6 @@
                 android:visibility="gone" />
         </RelativeLayout>
 
-        <RelativeLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end">
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab_current_location"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="@dimen/fab_margin"
-                android:scaleType="center"
-                app:backgroundTint="@color/colorPrimary"
-                app:srcCompat="@drawable/ic_action_current_location" />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab_direction"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/fab_current_location"
-                android:layout_margin="@dimen/fab_margin"
-                android:scaleType="center"
-                app:backgroundTint="@color/colorPrimary"
-                app:srcCompat="@android:drawable/ic_menu_directions" />
-
-            <android.support.design.widget.FloatingActionButton
-                android:id="@+id/fab_walking"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/fab_current_location"
-                android:layout_margin="@dimen/fab_margin"
-                android:scaleType="center"
-                android:visibility="gone"
-                app:backgroundTint="@color/colorPrimary"
-                app:srcCompat="@drawable/ic_travel_walking" />
-        </RelativeLayout>
-
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">

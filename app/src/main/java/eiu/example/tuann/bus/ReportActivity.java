@@ -40,12 +40,13 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MainActivity.animation.setVisibility(View.GONE);
-                MainActivity.avLoadingIndicatorView.setVisibility(View.GONE);
-                MainActivity.avLoadingIndicatorView.hide();
                 onBackPressed();
             }
         });
+
+        MainActivity mainActivity = new MainActivity();
+        mainActivity.hideAnimation();
+
         animation = (ImageView) findViewById(R.id.bus_gif);
         Glide.with(this).load(R.drawable.gif_bus).into(animation);
         avLoadingIndicatorView = (AVLoadingIndicatorView) (findViewById(R.id.avi));
@@ -57,9 +58,6 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onBackPressed() {
-        MainActivity.animation.setVisibility(View.GONE);
-        MainActivity.avLoadingIndicatorView.setVisibility(View.GONE);
-        MainActivity.avLoadingIndicatorView.hide();
         super.onBackPressed();
     }
 
@@ -82,10 +80,6 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
                         }
                     }
                 }).start();
-
-                MainActivity.animation.setVisibility(View.GONE);
-                MainActivity.avLoadingIndicatorView.setVisibility(View.GONE);
-                MainActivity.avLoadingIndicatorView.hide();
                 Thread welcomeThread = new Thread() {
 
                     @Override
@@ -96,12 +90,11 @@ public class ReportActivity extends AppCompatActivity implements View.OnClickLis
                         } catch (Exception e) {
 
                         } finally {
-                            startActivity(new Intent(ReportActivity.this, MainActivity.class));
-                            finish();
                         }
                     }
                 };
                 welcomeThread.start();
+                onBackPressed();
             } else {
                 content.setError("Nội dung quá ngắn!");
                 focusView = content;
