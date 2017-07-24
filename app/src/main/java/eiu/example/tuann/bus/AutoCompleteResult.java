@@ -4,6 +4,7 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
@@ -23,6 +24,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by tuann on 5/14/2017.
@@ -104,6 +106,7 @@ public class AutoCompleteResult {
             String s = list.get(1).substring(1, list.get(1).length() - 1);
             list = Arrays.asList(s.toString().split(","));
             LatLng latLng = new LatLng(Double.parseDouble(list.get(0)), Double.parseDouble(list.get(1)));
+            DirectionFragment.fragmentManager.beginTransaction().replace(R.id.information_direction_layout_maps, DirectionFragment.informationDirectionFragment, DirectionFragment.informationDirectionFragment.getTag()).show(DirectionFragment.informationDirectionFragment).commit();
             if (MainActivity.findAddress != null) {
                 MainActivity.findAddress.remove();
             }
@@ -112,6 +115,7 @@ public class AutoCompleteResult {
                 MainActivity.endDirection.remove();
             }
             latLngStartDirection = latLng;
+
             MainActivity.hideKeyboard(MainActivity.appCompatActivity);
         }
     };
@@ -121,6 +125,7 @@ public class AutoCompleteResult {
             = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            MainActivity.showAnimation();
             final AutocompletePrediction item = MainActivity.mAdapterPlaceAutoComplete.getItem(position);
             final String placeId = item.getPlaceId();
             final CharSequence primaryText = item.getPrimaryText(null);
@@ -128,8 +133,6 @@ public class AutoCompleteResult {
             placeResult.setResultCallback(mUpdatePlaceDetailsEndDirectionCallback);
         }
     };
-
-    private int hight = 0;
 
     private ResultCallback<PlaceBuffer> mUpdatePlaceDetailsEndDirectionCallback = new ResultCallback<PlaceBuffer>() {
         @Override
@@ -146,62 +149,24 @@ public class AutoCompleteResult {
             if (latLngStartDirection == null && MainActivity.currentLocation != null) {
                 latLngStartDirection = MainActivity.currentLocation;
             }
+            latLngEndDirection = place.getLatLng();
             direction(latLngStartDirection, latLngEndDirection);
         }
     };
 
     public void direction(LatLng start, LatLng end) {
-        if (MainActivity.findAddress != null) {
-            MainActivity.findAddress.remove();
+        ParserTask.padding = 250;
+        DirectionFragment.fragmentManager.beginTransaction().replace(R.id.information_direction_layout_maps, DirectionFragment.informationDirectionFragment, DirectionFragment.informationDirectionFragment.getTag()).show(DirectionFragment.informationDirectionFragment).commit();
+        ParserTask.addressStart = getAddress(start.latitude, start.longitude);
+        ParserTask.addressEnd = getAddress(end.latitude, end.longitude);
+        MainActivity.checkRemovePoint();
+        if (start != MainActivity.currentLocation) {
+            MainActivity.startDirection = MainActivity.mMap.addMarker(new MarkerOptions().position(start).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_action_start)));
         }
+        MainActivity.endDirection = MainActivity.mMap.addMarker(new MarkerOptions().position(end).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_action_end)));
 
-        if (MainActivity.polyline != null) {
-            MainActivity.polyline.remove();
-        }
-
-        MainActivity.startDirection = MainActivity.mMap.addMarker(new MarkerOptions().position(start).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_action_round)));
-        MainActivity.endDirection = MainActivity.mMap.addMarker(new MarkerOptions().position(end).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
-
-
-        if (MainActivity.markerPoints.size() > 1) {
-            MainActivity.markerPoints.clear();
-        }
-
-        MainActivity.markerPoints.add(start);
-        if (MainActivity.markerPoints.size() == 1) {
-            MainActivity.markerPoints.add(end);
-        } else if (MainActivity.markerPoints.size() == 2) {
-            MainActivity.markerPoints.add(start);
-        }
-
-        List<Address> addresses = null;
-        Geocoder geocoder = new Geocoder(MainActivity.appCompatActivity);
-        try {
-            addresses = geocoder.getFromLocation(start.latitude, start.longitude, 1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Address adddress = addresses.get(0);
-        MainActivity.addressWalkingDirection = (String.valueOf(adddress.getAddressLine(0) + ", " + adddress.getAddressLine(1) + ", " + adddress.getAddressLine(2) + "\n" + "Tọa độ: " + start.latitude + ", " + start.longitude));
-
-        final RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) MainActivity.viewMap.getLayoutParams();
-        MainActivity.tvDistanceDuration.setVisibility(View.VISIBLE);
-        MainActivity.tvDistanceDuration.getViewTreeObserver().
-
-                addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-                    @Override
-                    public void onGlobalLayout() {
-                        MainActivity.tvDistanceDuration.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        if (hight == 0) {
-                            hight = MainActivity.tvDistanceDuration.getHeight() * 3 - 16;
-                        }
-                        layoutParams.setMargins(0, 0, 0, hight);
-                    }
-                });
-        LatLng origin = MainActivity.markerPoints.get(0);
-        LatLng dest = MainActivity.markerPoints.get(1);
+        LatLng origin = start;
+        LatLng dest = end;
 
         // Getting URL to the Google Directions API
         String url = getUrl(origin, dest);
@@ -235,5 +200,20 @@ public class AutoCompleteResult {
         String url = "https://maps.googleapis.com/maps/api/directions/" + output + "?" + parameters;
 
         return url;
+    }
+
+    private String getAddress(Double latitude, Double longitude) {
+        List<Address> addresses = null;
+        String addressS = null;
+        Geocoder geocoder = new Geocoder(MainActivity.appCompatActivity, Locale.getDefault());
+        try {
+            addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            Address address = addresses.get(0);
+            addressS = address.getAddressLine(0) + ", " + address.getAddressLine(1) + ", " + address.getAddressLine(2) + ", " + address.getAddressLine(3);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return addressS;
     }
 }

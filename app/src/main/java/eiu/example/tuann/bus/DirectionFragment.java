@@ -34,12 +34,12 @@ public class DirectionFragment extends Fragment implements View.OnClickListener,
     private ImageView backDirection;
     private ImageView swapTextDirection;
 
-    private FragmentManager fragmentManager;
+    public static FragmentManager fragmentManager;
     private MainFragment mainFragment;
     private RecentLocationFragment recentLocationFragment;
     private DirectionFragment directionFragment;
-
     private PlacePickerFragment placePickerFragment;
+    public static InformationDirectionFragment informationDirectionFragment;
 
     public static boolean isForcusStart = false;
 
@@ -55,6 +55,7 @@ public class DirectionFragment extends Fragment implements View.OnClickListener,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_direction, container, false);
         placePickerFragment = new PlacePickerFragment();
+        informationDirectionFragment = new InformationDirectionFragment();
         fragmentManager = getFragmentManager();
         directionFragment = new DirectionFragment();
         recentLocationFragment = new RecentLocationFragment();

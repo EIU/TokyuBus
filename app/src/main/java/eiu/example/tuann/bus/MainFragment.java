@@ -2,6 +2,7 @@ package eiu.example.tuann.bus;
 
 
 import android.app.Activity;
+import android.graphics.drawable.Drawable;
 import android.location.Address;
 import android.location.Geocoder;
 import android.os.Build;
@@ -28,8 +29,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import org.xml.sax.Parser;
+
 import java.io.IOException;
 import java.util.List;
+import java.util.Locale;
 
 import static eiu.example.tuann.bus.MainActivity.isDirectionFragmentShow;
 import static eiu.example.tuann.bus.MainActivity.isMainFragmentshow;
@@ -50,10 +54,11 @@ public class MainFragment extends Fragment implements View.OnClickListener, View
 
     private RecentLocationFragment recentLocationFragment = new RecentLocationFragment();
 
-    private FragmentManager manager;
+    private FragmentManager fragmentManager;
     private DirectionFragment directionFragment;
     private MainFragment mainFragment;
     private PlacePickerFragment placePickerFragment;
+    private InformationDirectionFragment informationDirectionFragment;
 
     public MainFragment() {
         // Required empty public constructor
@@ -65,10 +70,11 @@ public class MainFragment extends Fragment implements View.OnClickListener, View
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_main, container, false);
-        manager = getFragmentManager();
+        fragmentManager = getFragmentManager();
         directionFragment = new DirectionFragment();
         mainFragment = new MainFragment();
         placePickerFragment = new PlacePickerFragment();
+        informationDirectionFragment = new InformationDirectionFragment();
         mAutocompleteFindAddess = (AutoCompleteTextView) (view.findViewById(R.id.edittextFindAddress));
         mAutocompleteFindAddess.setImeOptions(EditorInfo.IME_ACTION_SEARCH);
         mAutocompleteFindAddess.setOnClickListener(this);
@@ -103,28 +109,19 @@ public class MainFragment extends Fragment implements View.OnClickListener, View
         if (v == fabDirection) {
             isMainFragmentshow = false;
             isDirectionFragmentShow = true;
-            manager.beginTransaction().replace(R.id.main_layout_maps, mainFragment, mainFragment.getTag()).hide(mainFragment).commit();
-            manager.beginTransaction().replace(R.id.direction_layout_maps, directionFragment, directionFragment.getTag()).commit();
-            manager.beginTransaction().replace(R.id.layout_place_picker, placePickerFragment, placePickerFragment.getTag()).commit();
-            manager.beginTransaction().replace(R.id.layout_recent_location, recentLocationFragment, recentLocationFragment.getTag()).commit();
+            fragmentManager.beginTransaction().replace(R.id.main_layout_maps, mainFragment, mainFragment.getTag()).hide(mainFragment).commit();
+            fragmentManager.beginTransaction().replace(R.id.direction_layout_maps, directionFragment, directionFragment.getTag()).setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_top).commit();
+            fragmentManager.beginTransaction().replace(R.id.layout_place_picker, placePickerFragment, placePickerFragment.getTag()).setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_top).commit();
+            fragmentManager.beginTransaction().replace(R.id.layout_recent_location, recentLocationFragment, recentLocationFragment.getTag()).setCustomAnimations(R.anim.slide_in_top, R.anim.slide_out_top).commit();
         } else if (v == fabWalking) {
             if (MainActivity.markerPoints.size() >= 2) {
-                final RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) MainActivity.viewMap.getLayoutParams();
-                MainActivity.tvDistanceDuration.setVisibility(View.VISIBLE);
-                MainActivity.tvDistanceDuration.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-                    @Override
-                    public void onGlobalLayout() {
-                        MainActivity.tvDistanceDuration.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                        if (MainActivity.hight == 0) {
-                            MainActivity.hight = MainActivity.tvDistanceDuration.getHeight() * 3 - 16;
-                        }
-                        layoutParams.setMargins(0, 0, 0, MainActivity.hight);
-                    }
-                });
+                MainActivity.showAnimation();
+                ParserTask.padding = 100;
+                fragmentManager.beginTransaction().replace(R.id.information_direction_layout_maps, informationDirectionFragment, informationDirectionFragment.getTag()).show(informationDirectionFragment).commit();
                 LatLng origin = MainActivity.markerPoints.get(0);
                 LatLng dest = MainActivity.markerPoints.get(1);
-
+                ParserTask.addressStart = getAddress(dest.latitude, dest.longitude);
+                ParserTask.addressEnd = getAddress(origin.latitude, origin.longitude);
                 // Getting URL to the Google Directions API
                 AutoCompleteResult autoCompleteResult = new AutoCompleteResult();
                 String url = autoCompleteResult.getUrl(origin, dest);
@@ -142,6 +139,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, View
     }
 
     public void findAddress() {
+        MainActivity.showAnimation();
         String location = mAutocompleteFindAddess.getText().toString().toLowerCase();
 //        if (!hashMapBus.containsKey(location)) {
         List<Address> addresses = null;
@@ -157,7 +155,7 @@ public class MainFragment extends Fragment implements View.OnClickListener, View
             if (findAddress != null) {
                 findAddress.remove();
             }
-            findAddress = MainActivity.mMap.addMarker(new MarkerOptions().position(latLng).title(address.getFeatureName()).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+            findAddress = MainActivity.mMap.addMarker(new MarkerOptions().position(latLng).title(address.getFeatureName()).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_action_marker)));
             MainActivity.mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 16));
         }
 //        } else {
@@ -208,5 +206,20 @@ public class MainFragment extends Fragment implements View.OnClickListener, View
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
+    }
+
+    private String getAddress(Double latitude, Double longitude) {
+        List<Address> addresses = null;
+        String addressS = null;
+        Geocoder geocoder = new Geocoder(MainActivity.appCompatActivity, Locale.getDefault());
+        try {
+            addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            Address address = addresses.get(0);
+            addressS = address.getAddressLine(0) + ", " + address.getAddressLine(1) + ", " + address.getAddressLine(2) + ", " + address.getAddressLine(3);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return addressS;
     }
 }

@@ -22,22 +22,24 @@
             android:layout_height="45dp"
             android:layout_margin="5dp"
             android:background="@drawable/search_edittext"
-            android:drawableLeft="@drawable/ic_open_drawer"
+            android:drawableLeft="@drawable/ic_action_dehaze"
             android:drawablePadding="10dp"
             android:drawableRight="@drawable/ic_action_clear"
-            android:hint="Nhập nơi cần tìm hoặc số xe (VD: Xe 54)"
+            android:hint="@string/hint_autocomplete_find_address"
             android:imeOptions="actionSearch"
             android:inputType="textAutoComplete"
             android:maxLines="1"
             android:singleLine="true"
-            android:textColorHint="@color/colorGray500"></AutoCompleteTextView>
+            android:textColorHint="@color/colorGray500"/>
 
     </LinearLayout>
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end">
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="10dp"
+        android:layout_marginRight="3dp">
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab_current_location"

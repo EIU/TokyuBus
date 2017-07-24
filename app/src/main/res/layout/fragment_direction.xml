@@ -13,7 +13,7 @@
         <RelativeLayout
             android:id="@+id/full_layout_direction"
             android:layout_width="fill_parent"
-            android:layout_height="198dp"
+            android:layout_height="210dp"
             android:background="@color/colorPrimary">
 
             <RelativeLayout
@@ -27,7 +27,8 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="left|top"
                 android:layout_marginLeft="5dp"
-                android:background="@drawable/ic_action_back" />
+                android:layout_marginTop="3dp"
+                android:background="@drawable/ic_action_arrow_left" />
 
             <RelativeLayout
                 android:id="@+id/layout_main_direction"
@@ -43,11 +44,13 @@
                     android:id="@+id/start_location"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="40dp"
+                    android:layout_marginLeft="45dp"
                     android:layout_marginRight="40dp"
-                    android:background="@drawable/shape_edittext"
-                    android:hint="Vị trí hiện tại"
-                    android:padding="5dp"
+                    android:background="@drawable/shape_edittext_direction"
+                    android:hint="@string/hint_autocomplete_start_direction"
+                    android:maxLines="1"
+                    android:padding="8dp"
+                    android:singleLine="true"
                     android:textColorHint="@color/colorPrimary" />
 
                 <AutoCompleteTextView
@@ -55,12 +58,14 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_below="@+id/start_location"
-                    android:layout_marginLeft="40dp"
+                    android:layout_marginLeft="45dp"
                     android:layout_marginRight="40dp"
                     android:layout_marginTop="10dp"
-                    android:background="@drawable/shape_edittext"
-                    android:hint="Nhập vị trí cần tìm"
-                    android:padding="5dp" />
+                    android:background="@drawable/shape_edittext_direction"
+                    android:hint="@string/autocomplete_end_direction"
+                    android:maxLines="1"
+                    android:padding="8dp"
+                    android:singleLine="true" />
 
                 <ImageView
                     android:id="@+id/swap_location"
@@ -68,21 +73,15 @@
                     android:layout_height="wrap_content"
                     android:layout_alignParentRight="true"
                     android:layout_marginRight="5dp"
-                    android:layout_marginTop="21dp"
+                    android:layout_marginTop="25dp"
                     android:background="@drawable/ic_action_swap" />
 
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:background="@drawable/ic_action_location_search" />
-
-                <ImageView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="5dp"
-                    android:layout_marginTop="43dp"
-                    android:background="@drawable/ic_action_add_location" />
+                    android:layout_marginLeft="7dp"
+                    android:layout_marginTop="25dp"
+                    android:background="@drawable/ic_start_and_finish" />
             </RelativeLayout>
 
             <android.support.design.widget.BottomNavigationView

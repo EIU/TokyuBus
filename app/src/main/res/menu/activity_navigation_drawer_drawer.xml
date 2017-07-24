@@ -1,7 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:title="Loại bản đồ">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        app:itemTextColor="#000000"
+        android:title="Loại bản đồ">
         <menu>
+            <item
+                android:id="@+id/nav_stallite"
+                android:icon="@drawable/ic_menu_satellite"
+                android:title="Vệ tinh" />
             <item
                 android:id="@+id/nav_nomal"
                 android:icon="@drawable/ic_menu_nomal"
@@ -10,10 +17,6 @@
                 android:id="@+id/nav_hybrid"
                 android:icon="@drawable/ic_menu_hybrid"
                 android:title="Hổn hợp" />
-            <item
-                android:id="@+id/nav_stallite"
-                android:icon="@drawable/ic_menu_satellite"
-                android:title="Vệ tinh" />
             <item
                 android:id="@+id/nav_terrain"
                 android:icon="@drawable/ic_menu_terrain"
@@ -28,7 +31,7 @@
         <menu>
             <item
                 android:id="@+id/nav_nearby_bustop"
-                android:icon="@drawable/ic_bus_stop"
+                android:icon="@drawable/ic_menu_bus_stop"
                 android:title="Trạm xe bus gần bạn"></item>
             <item
                 android:id="@+id/nav_schedule"

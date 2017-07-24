@@ -26,32 +26,11 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"></ListView>
 
-        <ImageView
-            android:id="@+id/bus_gif"
+        <FrameLayout
+            android:id="@+id/animation_loading"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
-            android:layout_marginBottom="50dp"
-            android:foregroundGravity="bottom"
-            android:scaleType="fitXY"
-            android:visibility="gone">
-
-            <requestFocus></requestFocus>
-        </ImageView>
-
-        <com.wang.avi.AVLoadingIndicatorView
-            android:id="@+id/avi"
-            style="@style/AVLoadingIndicatorView.Large"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|center"
-            android:foregroundGravity="bottom"
-            android:visibility="gone"
-            app:indicatorColor="@color/colorPrimary"
-            app:indicatorName="BallPulseIndicator">
-
-            <requestFocus></requestFocus>
-        </com.wang.avi.AVLoadingIndicatorView>
-
+            android:layout_gravity="bottom|center"></FrameLayout>
     </FrameLayout>
+
 </android.support.constraint.ConstraintLayout>

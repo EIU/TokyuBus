@@ -41,7 +41,7 @@ public class PlacePickerFragment extends Fragment implements View.OnClickListene
 
     private DirectionFragment directionFragment;
 
-    AutoCompleteResult autoCompleteResult;
+    private AutoCompleteResult autoCompleteResult;
 
     public PlacePickerFragment() {
         // Required empty public constructor
@@ -86,17 +86,21 @@ public class PlacePickerFragment extends Fragment implements View.OnClickListene
                     directionFragment.setTextStartDirectionAutoComplete(place.getAddress().toString());
                     latLngStartDirection = place.getLatLng();
                     if (latLngEndDirection != null) {
+                        MainActivity.showAnimation();
+                        ParserTask.padding = 250;
+                        DirectionFragment.fragmentManager.beginTransaction().replace(R.id.information_direction_layout_maps, DirectionFragment.informationDirectionFragment, DirectionFragment.informationDirectionFragment.getTag()).show(DirectionFragment.informationDirectionFragment).commit();
                         autoCompleteResult.direction(latLngStartDirection, latLngEndDirection);
                         latLngStartDirection = null;
-
                     }
                 } else if (directionFragment.getIsForcusEnd()) {
                     directionFragment.setTextEndDirectionAutoComplete(place.getAddress().toString());
                     latLngEndDirection = place.getLatLng();
                     if (latLngStartDirection == null) {
+                        MainActivity.showAnimation();
+                        ParserTask.padding = 100;
                         AutoCompleteResult.latLngStartDirection = MainActivity.currentLocation;
+                        DirectionFragment.fragmentManager.beginTransaction().replace(R.id.information_direction_layout_maps, DirectionFragment.informationDirectionFragment, DirectionFragment.informationDirectionFragment.getTag()).show(DirectionFragment.informationDirectionFragment).commit();
                         autoCompleteResult.direction(AutoCompleteResult.latLngStartDirection, place.getLatLng());
-
                     } else {
                         autoCompleteResult.direction(latLngStartDirection, latLngEndDirection);
                         latLngStartDirection = null;

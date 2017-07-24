@@ -36,37 +36,5 @@
                 android:textColor="#000000"
                 android:visibility="gone" />
         </RelativeLayout>
-
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <ImageView
-                android:id="@+id/bus_gif"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|center"
-                android:layout_marginBottom="50dp"
-                android:foregroundGravity="bottom"
-                android:scaleType="fitXY"
-                android:visibility="gone">
-
-                <requestFocus></requestFocus>
-            </ImageView>
-
-            <com.wang.avi.AVLoadingIndicatorView
-                android:id="@+id/avi"
-                style="@style/AVLoadingIndicatorView.Large"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom|center"
-                android:foregroundGravity="bottom"
-                android:visibility="gone"
-                app:indicatorColor="@color/colorPrimary"
-                app:indicatorName="BallPulseIndicator">
-
-                <requestFocus></requestFocus>
-            </com.wang.avi.AVLoadingIndicatorView>
-        </FrameLayout>
     </FrameLayout>
 </android.support.constraint.ConstraintLayout>

@@ -124,9 +124,6 @@ public class MainActivity extends AppCompatActivity
     private TextView mNameLoged;
     private ImageView buttonDropDown;
     public static View viewMap;
-    public static TextView tvDistanceDuration;
-    private static AVLoadingIndicatorView avLoadingIndicatorView;
-    private static ImageView animation;
 
     private static final LatLngBounds BOUNDS_GREATER_SYDNEY = new LatLngBounds(new LatLng(-0, 0), new LatLng(-0, 0));
 
@@ -164,18 +161,18 @@ public class MainActivity extends AppCompatActivity
 
     public static Polyline polyline = null;
 
-    public static String addressWalkingDirection;
-
     public static AppCompatActivity appCompatActivity;
 
     public static String travelMod;
 
     public static HashMap<Double, Double> hashMapNearByBusStop;
 
-    private FragmentManager manager = getSupportFragmentManager();
+    private static FragmentManager manager;
     private MainFragment mainFragment = new MainFragment();
     private DirectionFragment directionFragment = new DirectionFragment();
     private PlacePickerFragment placePickerFragment = new PlacePickerFragment();
+    private static InformationDirectionFragment informationDirectionFragment = new InformationDirectionFragment();
+    public static AnimationLoadingFragment animationLoadingFragment = new AnimationLoadingFragment();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -186,13 +183,11 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_navigation_drawer);
         appCompatActivity = MainActivity.this;
 
+        manager = getSupportFragmentManager();
+
         progressDialog = new ProgressDialog(this);
         progressDialog.setCancelable(false);
         progressDialog.setMessage("Đang xử lý...");
-
-        animation = (ImageView) findViewById(R.id.bus_gif);
-        Glide.with(this).load(R.drawable.gif_bus).into(animation);
-        avLoadingIndicatorView = (AVLoadingIndicatorView) (findViewById(R.id.avi));
 
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawer, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -216,8 +211,6 @@ public class MainActivity extends AppCompatActivity
         navigationView.setItemIconTintList(null);
 
         manager.beginTransaction().replace(R.id.main_layout_maps, mainFragment, mainFragment.getTag()).commit();
-
-        tvDistanceDuration = (TextView) findViewById(R.id.tv_distance_time);
 
         firebaseAuth = FirebaseAuth.getInstance();
         databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -431,9 +424,7 @@ public class MainActivity extends AppCompatActivity
             welcomeThread.start();
 
         } else if (id == R.id.nav_bug) {
-            animation.setVisibility(View.VISIBLE);
-            avLoadingIndicatorView.setVisibility(View.VISIBLE);
-            avLoadingIndicatorView.show();
+            showAnimation();
             Thread welcomeThread = new Thread() {
                 @Override
                 public void run() {
@@ -519,49 +510,20 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onMapLongClick(LatLng latLng) {
         hideKeyboard(this);
-        if (startDirection != null) {
-            startDirection.remove();
-        }
-        if (endDirection != null) {
-            endDirection.remove();
-        }
-        if (findAddress != null) {
-            findAddress.remove();
-        }
 
-        if (polyline != null) {
-            polyline.remove();
-        }
-        if (tvDistanceDuration.getVisibility() == View.VISIBLE) {
-            RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) viewMap.getLayoutParams();
-            layoutParams.setMargins(0, 0, 0, 0);
-            tvDistanceDuration.setVisibility(View.GONE);
-        }
+        checkRemovePoint();
 
-        findAddress = mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN)));
+        manager.beginTransaction().replace(R.id.information_direction_layout_maps, informationDirectionFragment, informationDirectionFragment.getTag()).hide(informationDirectionFragment).commit();
+
+        findAddress = mMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_action_marker)));
 
         fabDirection.setVisibility(View.GONE);
         fabWalking.setVisibility(View.VISIBLE);
-
-        if (markerPoints.size() > 1) {
-            markerPoints.clear();
-        }
 
         markerPoints.add(latLng);
         if (markerPoints.size() == 1) {
             markerPoints.add(currentLocation);
         }
-
-        List<Address> addresses = null;
-        Geocoder geocoder = new Geocoder(this);
-        try {
-            addresses = geocoder.getFromLocation(latLng.latitude, latLng.longitude, 1);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        Address adddress = addresses.get(0);
-        addressWalkingDirection = (String.valueOf(adddress.getAddressLine(0) + ", " + adddress.getAddressLine(1) + ", " + adddress.getAddressLine(2) + "\n" + "Tọa độ: " + latLng.latitude + ", " + latLng.longitude));
     }
 
     private void setUpBusStop() {
@@ -688,16 +650,45 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public static void hideAnimation() {
-        animation.setVisibility(View.GONE);
-        avLoadingIndicatorView.setVisibility(View.GONE);
-        avLoadingIndicatorView.hide();
+    public static void checkRemovePoint() {
+        if (MainActivity.startDirection != null) {
+            MainActivity.startDirection.remove();
+        }
+        if (MainActivity.endDirection != null) {
+            MainActivity.endDirection.remove();
+        }
+        if (MainActivity.findAddress != null) {
+            MainActivity.findAddress.remove();
+        }
+        if (MainActivity.markerPoints != null) {
+            MainActivity.markerPoints.clear();
+        }
+        if (MainActivity.polyline != null) {
+            MainActivity.polyline.remove();
+        }
     }
 
-    public void showAnimation() {
-        animation.setVisibility(View.VISIBLE);
-        avLoadingIndicatorView.setVisibility(View.VISIBLE);
-        avLoadingIndicatorView.show();
+    private boolean checkGooglePlayServices() {
+        final int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
+        if (status != ConnectionResult.SUCCESS) {
+            Log.e(TAG, GooglePlayServicesUtil.getErrorString(status));
+            // ask user to update google play services.
+            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this, 1);
+            dialog.show();
+            return false;
+        } else {
+            Log.i(TAG, GooglePlayServicesUtil.getErrorString(status));
+            // google play services is updated.
+            //your code goes here...
+            return true;
+        }
+    }
+
+    public static void showAnimation(){
+        manager.beginTransaction().replace(R.id.animation_loading, animationLoadingFragment, animationLoadingFragment.getTag()).show(animationLoadingFragment).commit();
+    }
+    public static void hideAnimation(){
+        manager.beginTransaction().replace(R.id.animation_loading, animationLoadingFragment, animationLoadingFragment.getTag()).hide(animationLoadingFragment).commit();
     }
 
     private TreeSet<String> treeSet = new TreeSet<String>();
@@ -981,20 +972,4 @@ public class MainActivity extends AppCompatActivity
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-    private boolean checkGooglePlayServices() {
-        final int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
-        if (status != ConnectionResult.SUCCESS) {
-            Log.e(TAG, GooglePlayServicesUtil.getErrorString(status));
-            // ask user to update google play services.
-            Dialog dialog = GooglePlayServicesUtil.getErrorDialog(status, this, 1);
-            dialog.show();
-            return false;
-        } else {
-            Log.i(TAG, GooglePlayServicesUtil.getErrorString(status));
-            // google play services is updated.
-            //your code goes here...
-            return true;
-        }
-    }
 }

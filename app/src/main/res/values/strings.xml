@@ -22,4 +22,7 @@
     <string name="title_travel_car">Ô tô</string>
     <string name="choose_on_maps">Chọn trên bản đồ</string>
     <string name="title_activity_find_bus_stop">FindBusStopActivity</string>
+    <string name="hint_autocomplete_find_address">"Nhập nơi cần tìm hoặc số xe (VD: Xe 54)</string>
+    <string name="hint_autocomplete_start_direction">"Vị trí hiện tại</string>
+    <string name="autocomplete_end_direction">""Nhập vị trí cần tìm</string>
 </resources>

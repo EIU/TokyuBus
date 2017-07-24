@@ -2,6 +2,7 @@ package eiu.example.tuann.bus;
 
 import android.location.Location;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -24,8 +25,6 @@ public class NearbyBusStopActivity extends AppCompatActivity {
 
     private ListView listNearByBusStop;
     private TextView textView;
-    private AVLoadingIndicatorView avLoadingIndicatorView;
-    private ImageView animation;
 
     public static LatLng latLngClickNearBy = null;
 
@@ -35,12 +34,23 @@ public class NearbyBusStopActivity extends AppCompatActivity {
 
     private TreeMap<Integer, String> hashMapClickNearBy = new TreeMap<Integer, String>();
 
+    private FragmentManager fragmentManager;
+
+    private AnimationLoadingFragment animationLoadingFragment;
+
+    private MainActivity mainActivity;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_nearby_bus_stop);
+
+        mainActivity = new MainActivity();
+        animationLoadingFragment = new AnimationLoadingFragment();
+        fragmentManager = getSupportFragmentManager();
+        mainActivity.hideAnimation();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -53,13 +63,8 @@ public class NearbyBusStopActivity extends AppCompatActivity {
             }
         });
 
-        animation = (ImageView) findViewById(R.id.bus_gif);
-        Glide.with(this).load(R.drawable.gif_bus).into(animation);
-        avLoadingIndicatorView = (AVLoadingIndicatorView) (findViewById(R.id.avi));
         listNearByBusStop = (ListView) (findViewById(R.id.list_nearby_busstop));
         textView = (TextView) (findViewById(R.id.clean_listview));
-
-        MainActivity.hideAnimation();
 
         TreeMap<Float, String> treeClickNearBy = new TreeMap<Float, String>();
 
@@ -103,9 +108,7 @@ public class NearbyBusStopActivity extends AppCompatActivity {
         listNearByBusStop.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                animation.setVisibility(View.VISIBLE);
-                avLoadingIndicatorView.setVisibility(View.VISIBLE);
-                avLoadingIndicatorView.show();
+                fragmentManager.beginTransaction().replace(R.id.animation_loading, animationLoadingFragment, animationLoadingFragment.getTag()).commit();
                 String lat = hashMapClickNearBy.get(position).substring(0, hashMapClickNearBy.get(position).indexOf(' '));
                 String lon = hashMapClickNearBy.get(position).substring(hashMapClickNearBy.get(position).indexOf(' ') + 1, hashMapClickNearBy.get(position).length());
                 latLngClickNearBy = new LatLng(Double.parseDouble(lat), Double.parseDouble(lon));

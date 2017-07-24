@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -57,7 +58,8 @@ public class InformationMarkerActivity extends AppCompatActivity implements View
 
     private Address address;
 
-    public static String fullAddressMarker;
+    private FragmentManager fragmentManager;
+    private InformationDirectionFragment informationDirectionFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +79,8 @@ public class InformationMarkerActivity extends AppCompatActivity implements View
                 onBackPressed();
             }
         });
+        fragmentManager = getSupportFragmentManager();
+        informationDirectionFragment = new InformationDirectionFragment();
         latitude = MainActivity.locationMarkerClicked.latitude;
         longitude = MainActivity.locationMarkerClicked.longitude;
         latLng = new LatLng(latitude, longitude);
@@ -91,16 +95,13 @@ public class InformationMarkerActivity extends AppCompatActivity implements View
         textViewAddress = (TextView) (findViewById(R.id.address_information_marker));
         buttonDirection.setOnClickListener(this);
         getImageMarker();
-        fullAddressMarker = getAddressMarker();
-        textViewAddress.setText(fullAddressMarker);
+        textViewAddress.setText(getAddressMarker());
         firebaseStorage = FirebaseStorage.getInstance();
         mStorageRef = firebaseStorage.getReferenceFromUrl("gs://becamex-tokyu-bus.appspot.com");
         sendImageB = (Button) (findViewById(R.id.send_image));
         databaseReference = FirebaseDatabase.getInstance().getReference();
         sendImageB.setOnClickListener(this);
     }
-
-    private int hight = 0;
 
     private String getAddressMarker() {
         List<Address> addresses = null;
@@ -111,7 +112,7 @@ public class InformationMarkerActivity extends AppCompatActivity implements View
             e.printStackTrace();
         }
         address = addresses.get(0);
-        return (String.valueOf(address.getAddressLine(0) + ", " + address.getAddressLine(1) + ", " + address.getAddressLine(2) + ", " + address.getAddressLine(3) + "\n" + "Tọa độ: " + latitude + " " + longitude));
+        return (String.valueOf(address.getAddressLine(0) + ", " + address.getAddressLine(1) + ", " + address.getAddressLine(2) + ", " + address.getAddressLine(3)));
     }
 
     private void getImageMarker() {
@@ -140,41 +141,12 @@ public class InformationMarkerActivity extends AppCompatActivity implements View
     @Override
     public void onClick(View v) {
         if (v == buttonDirection) {
-            if (MainActivity.startDirection != null) {
-                MainActivity.startDirection.remove();
-            }
-            if (MainActivity.endDirection != null) {
-                MainActivity.endDirection.remove();
-            }
-            if (MainActivity.findAddress != null) {
-                MainActivity.findAddress.remove();
-            }
-            if (MainActivity.polyline != null) {
-                MainActivity.polyline.remove();
-            }
-
-            if (MainActivity.markerPoints.size() > 1) {
-                MainActivity.markerPoints.clear();
-            }
-
+            MainActivity.checkRemovePoint();
+            fragmentManager.beginTransaction().replace(R.id.information_direction_layout_maps, informationDirectionFragment, informationDirectionFragment.getTag()).commit();
             MainActivity.markerPoints.add(latLng);
             if (MainActivity.markerPoints.size() == 1) {
                 MainActivity.markerPoints.add(MainActivity.currentLocation);
             }
-
-            final RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) MainActivity.viewMap.getLayoutParams();
-            MainActivity.tvDistanceDuration.setVisibility(View.VISIBLE);
-            MainActivity.tvDistanceDuration.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-                @Override
-                public void onGlobalLayout() {
-                    MainActivity.tvDistanceDuration.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                    if (hight == 0 && MainActivity.tvDistanceDuration.getHeight() == 0) {
-                        hight = MainActivity.tvDistanceDuration.getHeight() * 3 - 16;
-                    }
-                    layoutParams.setMargins(0, 0, 0, hight);
-                }
-            });
             LatLng origin = MainActivity.markerPoints.get(0);
             LatLng dest = MainActivity.markerPoints.get(1);
 
@@ -186,7 +158,7 @@ public class InformationMarkerActivity extends AppCompatActivity implements View
             // Start downloading json data from Google Directions API
             FetchUrl.execute(url);
             onBackPressed();
-        }  else if (v == sendImageB) {
+        } else if (v == sendImageB) {
             Intent intent = new Intent(Intent.ACTION_PICK);
             intent.setType("image/*");
             startActivityForResult(intent, GALLERY_INTENT);

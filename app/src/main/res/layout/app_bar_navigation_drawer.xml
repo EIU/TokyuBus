@@ -24,6 +24,18 @@
             android:layout_height="fill_parent"></FrameLayout>
 
         <FrameLayout
+            android:id="@+id/information_direction_layout_maps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"></FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/animation_loading"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center"></FrameLayout>
+
+        <FrameLayout
             android:id="@+id/sendToFireBase"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

@@ -22,4 +22,9 @@
 
     <include layout="@layout/content_information_marker" />
 
+    <FrameLayout
+        android:id="@+id/information_direction_layout_maps"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"></FrameLayout>
 </android.support.design.widget.CoordinatorLayout>
